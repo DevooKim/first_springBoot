@@ -1,5 +1,7 @@
 package com.example.config.auth;
 
+import com.example.config.auth.dto.OAuthAttributes;
+import com.example.config.auth.dto.SessionUser;
 import com.example.domain.user.User;
 import com.example.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +25,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2UserService delegate = new DefaultOAuth2UserService();
+        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();    //현재 로그인 중인 서비스를 구분한다.
         String userNameAttributeName = userRequest
                 .getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+        //OAuth2 로그인 진행 시 키가되는 필드 값, 구글은 기본지원("sub") / 네이버 카카오등은 기본지우너 x
 
-        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttribute());
+        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
         User user = saveOrUpdate(attributes);
 
@@ -41,7 +44,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private User saveOrUpdate(OAuthAttributes attributes) {
         User user = userRepository.findByEmail(attributes.getEmail())
-                .map(entity -> entity.upate(attributes.getName(), attributes.getPicture()))
+                .map(entity -> entity.update(attributes.getName(), attributes.getPicture()))
                 .orElse(attributes.toEntity());
 
         return userRepository.save(user);
