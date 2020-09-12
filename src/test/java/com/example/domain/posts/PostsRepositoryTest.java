@@ -1,6 +1,7 @@
 package com.example.domain.posts;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class PostsRepositoryTest {
     }
 
     @Test
-    public void BaseTimeEntity_등록() {
+    public void BaseTimeEntity_save() {
         LocalDateTime now = LocalDateTime.of(2020,9,5,0,0,0);
         postsRepository.save(Posts.builder().title("title").content("content").author("author").build());
 
